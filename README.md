@@ -40,7 +40,7 @@ git clone [https://github.com/Understandingvictor/AUTOMATED-TEST-TASK-BY-LENDSQR
 cd AUTOMATED-TEST-TASK-BY-LENDSQR
 
 
-**Step 2: Install Dependencies**
+**Step 2: Install Dependencies**<br>
 npm install
 
 
@@ -101,5 +101,6 @@ The high-level summary only gives you the count. To find exactly which of the 50
     ```
     npm run report
     ```
+
 
 
