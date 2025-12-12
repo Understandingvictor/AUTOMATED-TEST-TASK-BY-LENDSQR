@@ -1,0 +1,40 @@
+{
+	"id": "c53fc43e-3aff-4ba9-9065-c6a65ce75872",
+	"name": "adjutor api environments",
+	"values": [
+		{
+			"key": "baseUrl",
+			"value": "https://adjutor.lendsqr.com/v2",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "bvn",
+			"value": "22222222222",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "bank_id",
+			"value": "1",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "reference_id",
+			"value": "DD-cU26qsO05mGCSGn",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "token",
+			"value": "sk_live_eaQwubB23Mim1xbDmr0OPRY0VCALhoIpDvXQbH9L",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"color": null,
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2025-12-12T00:55:41.551Z",
+	"_postman_exported_using": "Postman/11.75.5"
+}

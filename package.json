@@ -1,0 +1,28 @@
+{
+  "name": "automated-test-task-by-lendsqr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "report": "run_report.cmd",
+    "test-terminal": "newman run test.json.folder/collection.json -e test.json.folder/environment.json",
+    "test-silent": "newman run test.json.folder/collection.json -e test.json.folder/environment.json -r htmlextra",
+    "test-report": "npm run test-silent || npm run report"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://@github.com/Understandingvictor/AUTOMATED-TEST-TASK-BY-LENDSQR.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Understandingvictor/AUTOMATED-TEST-TASK-BY-LENDSQR/issues"
+  },
+  "homepage": "https://github.com/Understandingvictor/AUTOMATED-TEST-TASK-BY-LENDSQR#readme",
+  "dependencies": {
+    "newman": "^6.2.1",
+    "newman-reporter-htmlextra": "^1.23.1"
+  }
+}

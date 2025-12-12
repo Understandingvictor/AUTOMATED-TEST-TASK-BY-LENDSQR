@@ -1,0 +1,1542 @@
+{
+	"info": {
+		"_postman_id": "3c161506-e753-4930-a840-0f7fa565d3e7",
+		"name": "adjutor API",
+		"description": "This is a an Api testing task for lendSqr mock api version",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45370484"
+	},
+	"item": [
+		{
+			"name": "Bank Verification Number",
+			"item": [
+				{
+					"name": "Initialize BVN Consent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json();\r",
+									"\r",
+									"console.log(\"High-Level Status and Data Structure\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\" Validation for the HTTP status code (200)\",()=>{\r",
+									"    const resStatus = pm.response.code;\r",
+									"    pm.expect(resStatus).to.equal(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\" Confirm status property of the response body to be 'otp'\", ()=>{\r",
+									"    pm.expect(responseData.status).to.equal('otp');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validation for the expected response message\", ()=>{\r",
+									"    pm.expect(responseData).to.have.property('message', 'Please provide OTP sent to contact');\r",
+									"});\r",
+									"\r",
+									"console.log(\" Priority 2: Schema and Data Integrity (Type Checking and Data Formats)\");\r",
+									"console.log(\"------------------------------------------------------------------------\");\r",
+									"\r",
+									"pm.test(\"Confirm the API output maintains a predictable and correct structure\",()=>{\r",
+									"    pm.expect(responseData.status).to.be.a('string');\r",
+									"    pm.expect(responseData.data).to.be.a('string');\r",
+									"    pm.expect(responseData.meta.balance).to.be.a('number');\r",
+									"    pm.expect(responseData.meta.cost).to.be.a('number');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Confirm contact information is 11 digits in length (Nigerian standard)\", ()=>{\r",
+									"    pm.expect(responseData.data).to.have.lengthOf(11);\r",
+									"});\r",
+									"\r",
+									"console.log(\"Security and Data Masking (PII Protection)\");\r",
+									"console.log(\"--------------------------------------------------------\");\r",
+									"\r",
+									"pm.test(\"P3: Confirm contact information is properly obscured (masked) before being returned\", ()=>{\r",
+									"    pm.expect(responseData.data).to.include(\"***\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"contact\": \"08012345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/verification/bvn/{{bvn}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"verification",
+								"bvn",
+								"{{bvn}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complete Consent and get BVN Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json();\r",
+									"\r",
+									"console.log(\"High-Level Status and Data Structure\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status code (200)\",()=>{\r",
+									"    const resStatus = pm.response.code;\r",
+									"    pm.expect(resStatus).to.equal(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Confirm system-level status property is 'success'\",()=>{\r",
+									"    pm.expect(responseData.status).eql('success');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validation for the expected response message ('Successful')\", ()=>{\r",
+									"    pm.expect(responseData).to.have.property('message', 'Successful');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Confirm response data has the root 'data' field that holds BVN details\",()=>{\r",
+									"    pm.expect(responseData).to.have.property('data');\r",
+									"    pm.expect(responseData.data).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"console.log(\"Data Integrity and Format (BVN and PII Schema)\");\r",
+									"console.log(\"----------------------------------------------------------\");\r",
+									"\r",
+									"pm.test(\"Confirm BVN number is exactly 11 digits in length\",()=>{\r",
+									"    pm.expect(responseData.data.bvn).to.be.a('string');\r",
+									"    pm.expect(responseData.data.bvn).to.have.lengthOf(11);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Confirm 'first_name' and 'last_name' are present and not empty strings\",()=>{\r",
+									"    pm.expect(responseData.data.first_name).to.be.a(\"string\").and.not.to.be.empty;\r",
+									"    pm.expect(responseData.data.last_name).to.be.a(\"string\").and.not.to.be.empty;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Confirm correct format for date of birth (YYYY-MM-DD)\",()=>{\r",
+									"    pm.expect(responseData.data.dob).to.match(/^\\d{4}-\\d{2}-\\d{2}$/);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Confirm 'image_url' uses the secure 'https' protocol\",()=>{\r",
+									"    pm.expect(responseData.data.image_url).to.be.a('string');\r",
+									"    pm.expect(responseData.data.image_url).to.include('https');\r",
+									"});\r",
+									"\r",
+									"console.log(\"Financial/Meta Data Validation\");\r",
+									"console.log(\"----------------------------------------------\");\r",
+									"\r",
+									"pm.test(\"Confirm the BVN lookup was charged (meta.cost > 0)\",()=>{\r",
+									"    pm.expect(responseData.meta.cost).to.be.a('number').and.is.greaterThan(0);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"otp\": \"623553\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/verification/bvn/{{bvn}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"verification",
+								"bvn",
+								"{{bvn}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Bank Verification Number (BVN) is the national ID system created by Nigerian banks to uniquely identified bank customers in the Nigerian banking ecosystem.\n\nThe banking ecosystem has also created a mechanism where all the bank accounts tied to a specific BVN could be gotten.",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Get Accounts for a BVN",
+			"item": [
+				{
+					"name": "Initialize BVN Accounts Consent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json();\r",
+									"\r",
+									"console.log(\"High-Level Status and Data Structure\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status code (200)\",()=>{\r",
+									"    const resStatus = pm.response.code;\r",
+									"    pm.expect(resStatus).to.equal(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Confirm system-level status property is 'otp'\", ()=>{\r",
+									"    pm.expect(responseData.status).to.equal('otp');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validation for the expected response message\", ()=>{\r",
+									"    pm.expect(responseData).to.have.property('message', 'Please provide OTP sent to contact');\r",
+									"});\r",
+									"\r",
+									"console.log(\"Data Integrity and Schema Validation\");\r",
+									"console.log(\"--------------------------------------\");\r",
+									"\r",
+									"pm.test(\"Confirm the masked contact field ('data') is present, is a non-empty string, and masked\", ()=>{\r",
+									"    pm.expect(responseData).to.have.property('data');\r",
+									"    pm.expect(responseData.data).to.be.a('string').and.to.not.be.empty;\r",
+									"    // Check for the security measure (masking)\r",
+									"    pm.expect(responseData.data).to.include('****');\r",
+									"});\r",
+									"\r",
+									"console.log(\"Financial/Meta Data Validation\");\r",
+									"console.log(\"----------------------------------------------\");\r",
+									"\r",
+									"pm.test(\"Ensure the meta properties (cost and balance) are present, are numbers, and contain valid values\", ()=>{\r",
+									"    // Cost is typically 0 for an OTP initiation step if the charge occurs upon final verification.\r",
+									"    pm.expect(responseData.meta.cost).to.be.a('number').and.to.equal(0);\r",
+									"    // Balance must be greater than 0 for the API to be operational.\r",
+									"    pm.expect(responseData.meta.balance).to.be.a('number').and.to.be.above(0);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"contact\": \"08012345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/verification/bvn/{{bvn}}/accounts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"verification",
+								"bvn",
+								"{{bvn}}",
+								"accounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complete Consent and Get BVN Accounts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json();\r",
+									"const firstAccount = responseData.data[0]; // Assuming data is an array and we check the first element\r",
+									"\r",
+									"console.log(\"High-Level Status and Data Structure\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status code (200)\",()=>{\r",
+									"    const resStatus = pm.response.code;\r",
+									"    pm.expect(resStatus).to.equal(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Confirm the system-level status property is 'success'\", ()=>{\r",
+									"    pm.expect(responseData.status).to.eql('success');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validation for the response message ('Successful')\", ()=>{\r",
+									"    pm.expect(responseData).to.have.property('message', 'Successful');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Confirm that the main data field exists and is an array of accounts\", ()=>{\r",
+									"    pm.expect(responseData).to.have.property('data');\r",
+									"    pm.expect(responseData.data).to.be.an('array').and.to.have.length.of.at.least(1);\r",
+									"});\r",
+									"\r",
+									"console.log(\"Individual Account Schema and Data Integrity\");\r",
+									"console.log(\"----------------------------------------------------------\");\r",
+									"\r",
+									"pm.test(\"Confirm the account object contains mandatory identification fields\", ()=>{\r",
+									"    pm.expect(firstAccount).to.have.property('account_number').that.is.a('string').and.not.to.be.empty;\r",
+									"    pm.expect(firstAccount).to.have.property('account_name').that.is.a('string').and.not.to.be.empty;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Confirm bank details are present and correctly formatted\", ()=>{\r",
+									"    pm.expect(firstAccount).to.have.property('bank_code').that.is.a('string').and.to.have.lengthOf(3);\r",
+									"    pm.expect(firstAccount).to.have.property('bank_name').that.is.a('string').and.not.to.be.empty;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Confirm the 'account_status' is a valid, documented business number\", ()=>{\r",
+									"    pm.expect(firstAccount.account_status).to.be.a('number').and.to.be.oneOf([1, 2, 3, 4, 5, 6, 7, 8]);\r",
+									"});\r",
+									"\r",
+									"console.log(\"Financial/Meta Data Validation\");\r",
+									"console.log(\"----------------------------------------------\");\r",
+									"\r",
+									"pm.test(\"Confirm a transaction fee was successfully recorded (meta.cost > 0)\", ()=>{\r",
+									"    pm.expect(responseData.meta.cost).to.be.a('number').and.to.be.above(0);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"otp\": \"477226\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/verification/bvn/{{bvn}}/accounts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"verification",
+								"bvn",
+								"{{bvn}}",
+								"accounts"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Credit Bureaus 🇳🇬",
+			"item": [
+				{
+					"name": "Get Credit Report from CRC Credit Bureau",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json();\r",
+									"\r",
+									"console.log(\"High-Level Status and Data Structure\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status codes\",()=>{\r",
+									"    const resStatus = pm.response.code;\r",
+									"    pm.expect(resStatus).to.equal(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the system-level status\", ()=>{\r",
+									"    pm.expect(responseData.status).to.eql('success');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validation for the response message\", ()=>{\r",
+									"    pm.expect(responseData).to.have.property('message', 'Successful');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm Api response data has data field the credit history of a customer using their BVN. \",()=>{\r",
+									"    pm.expect(responseData).to.have.property('data');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm data field is a valid object\",()=>{\r",
+									"    pm.expect(responseData.data).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"console.log(\"Core Data Integrity and Format (Consumer Details)\");\r",
+									"console.log(\"---------------------------------------------------------------\");\r",
+									"\r",
+									"pm.test(\"confirm the full name is present\",()=>{\r",
+									"    pm.expect(responseData.data.nano_consumer_profile.consumer_details.name).to.be.a('string').and.to.not.be.empty;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm correct format for date of birth\",()=>{\r",
+									"    pm.expect(responseData.data.nano_consumer_profile.consumer_details.date_of_birth).to.match(/^\\d{2}-[A-Z]{3}-\\d{4}$/);\r",
+									"});\r",
+									"\r",
+									"console.log(\"Credit Summary and Business Logic Validation\");\r",
+									"console.log(\"--------------------------------------------------------\");\r",
+									"\r",
+									"pm.test(\"confirm the flag for credit facilities is valid (must be YES/NO).\",()=>{\r",
+									"    pm.expect(responseData.data.credit_nano_summary.summary.has_creditfacilities).to.be.oneOf(['YES', 'NO']);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the delinquency count for All Facilities is present and is a numeric string\",()=>{\r",
+									"    pm.expect(responseData.data.credit_nano_summary.summary.no_of_delinqcreditfacilities).to.be.a('string').and.to.match(/^\\d+$/);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm delinquency count for Microfinance category is present and is a string\",()=>{\r",
+									"    pm.expect(responseData.data.mfcredit_nano_summary.summary.no_of_delinqcreditfacilities).to.be.a('string');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm delinquency count for Microfinance Group category is a numeric string\",()=>{\r",
+									"    pm.expect(responseData.data.mfcredit_nano_summary.summary.no_of_delinqcreditfacilities).to.be.a('string').and.to.match(/^\\d+$/);\r",
+									"});\r",
+									"\r",
+									"console.log(\"Financial/Meta Data Validation\");\r",
+									"console.log(\"----------------------------------------------\");\r",
+									"\r",
+									"pm.test(\"confirm the expected charge for fetching the external CRC report\",()=>{\r",
+									"    pm.expect(responseData.meta.cost).to.be.a('number').and.to.equal(100);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the balance is returned as a number\",()=>{\r",
+									"    pm.expect(responseData.meta.balance).to.be.a('number');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/creditbureaus/crc/{{bvn}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"creditbureaus",
+								"crc",
+								"{{bvn}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Credit Report from FirstCentral Credit Bureau",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json();\r",
+									"\r",
+									"console.log(\"High-Level Status and Data Structure\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status codes\",()=>{\r",
+									"    const resStatus = pm.response.code;\r",
+									"    pm.expect(resStatus).to.equal(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the system-level status\", ()=>{\r",
+									"    pm.expect(responseData.status).to.eql('success');\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validation for the response message\", ()=>{\r",
+									"    pm.expect(responseData).to.have.property('message', 'Successful');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm Api response data has data field the credit history of a customer using their BVN. \",()=>{\r",
+									"    pm.expect(responseData).to.have.property('data');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm data field is a valid object\",()=>{\r",
+									"    pm.expect(responseData.data).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"console.log(\"Core Data Integrity and Format (Consumer Details)\");\r",
+									"console.log(\"---------------------------------------------------------------\");\r",
+									"\r",
+									"pm.test(\"confirm the full name is present\",()=>{\r",
+									"    pm.expect(responseData.data.nano_consumer_profile.consumer_details.name).to.be.a('string').and.to.not.be.empty;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm correct format for date of birth\",()=>{\r",
+									"    // Expected format: DD-MMM-YYYY (e.g., 25-MAR-1990)\r",
+									"    pm.expect(responseData.data.nano_consumer_profile.consumer_details.date_of_birth).to.match(/^\\d{2}-[A-Z]{3}-\\d{4}$/);\r",
+									"});\r",
+									"\r",
+									"console.log(\"Credit Summary and Business Logic Validation\");\r",
+									"console.log(\"--------------------------------------------------------\");\r",
+									"\r",
+									"pm.test(\"confirm the flag for credit facilities is valid (must be YES/NO).\",()=>{\r",
+									"    pm.expect(responseData.data.credit_nano_summary.summary.has_creditfacilities).to.be.oneOf(['YES', 'NO']);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the delinquency count for All Facilities is present and is a numeric string\",()=>{\r",
+									"    // Ensures the value is a string representation of a non-negative integer\r",
+									"    pm.expect(responseData.data.credit_nano_summary.summary.no_of_delinqcreditfacilities).to.be.a('string').and.to.match(/^\\d+$/);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm delinquency count for Microfinance category is present and is a string\",()=>{\r",
+									"    pm.expect(responseData.data.mfcredit_nano_summary.summary.no_of_delinqcreditfacilities).to.be.a('string');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm delinquency count for Microfinance Group category is a numeric string\",()=>{\r",
+									"    // Ensures the value is a string representation of a non-negative integer\r",
+									"    pm.expect(responseData.data.mfcredit_nano_summary.summary.no_of_delinqcreditfacilities).to.be.a('string').and.to.match(/^\\d+$/);\r",
+									"});\r",
+									"\r",
+									"console.log(\"Financial/Meta Data Validation\");\r",
+									"console.log(\"----------------------------------------------\");\r",
+									"\r",
+									"pm.test(\"confirm the expected charge for fetching the external CRC report\",()=>{\r",
+									"    pm.expect(responseData.meta.cost).to.be.a('number').and.to.equal(100);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the balance is returned as a number\",()=>{\r",
+									"    pm.expect(responseData.meta.balance).to.be.a('number');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/creditbureaus/firstcentral/{{bvn}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"creditbureaus",
+								"firstcentral",
+								"{{bvn}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "for accessing credit information through credit bureau integrations."
+		},
+		{
+			"name": "Direct Debit 🇳🇬",
+			"item": [
+				{
+					"name": "Get All Banks",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json()\r",
+									"\r",
+									"console.log(\"High-Level Status and Data Structure\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status codes\",()=>{\r",
+									"   const resStatus =  pm.response.code\r",
+									"   pm.expect(resStatus).to.equal(200);\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirms system-level success status  .\", ()=>{\r",
+									"    pm.expect(responseData.status).to.eql('success');\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Validation for the response message\", ()=>{\r",
+									"    pm.expect(responseData.message).to.match(/^This is a test mode response/);\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm the data property exists and report structure is an array\", ()=>{\r",
+									"   pm.expect(responseData.data).to.have.property('data'); \r",
+									"   pm.expect(responseData.data.data).to.be.an('array');\r",
+									"})\r",
+									"\r",
+									"\r",
+									"\r",
+									"console.log(\"Individual Bank Object Schema Validation\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"console.log('Assertion Type: Checking responseData.data.data[0]')\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm unique ID and name are present and correctly typed.\", ()=>{\r",
+									"   pm.expect(responseData.data.data[0].id).to.be.a('number').and.to.be.above(0); \r",
+									"   pm.expect(responseData.data.data[0].name).to.be.a('string').and.to.not.be.empty;\r",
+									"})\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirms the bank_code is a string containing 3 digits).\", ()=>{\r",
+									" pm.expect(responseData.data.data[0].bank_code).to.be.a('string').and.to.match(/^\\d{3}$/);\r",
+									"})\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm that the NIBSS institution code is a 6-digit string.\", ()=>{\r",
+									"   pm.expect(responseData.data.data[0].institution_code).to.be.a('string').and.to.have.lengthOf(6);\r",
+									"})\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm the logo field is present as a string and looks like a valid URL.\", ()=>{\r",
+									"   pm.expect(responseData.data.data[0].url).to.be.a('string').and.to.include('http');\r",
+									"})\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm the amount is returned as a string with two decimal places (e.g., \\\"50.00\\\").\", ()=>{\r",
+									"   pm.expect(responseData.data.data[0].activation_amount).to.be.a('string').and.to.match(/^\\d+\\.\\d{2}$/);\r",
+									"})\r",
+									"\r",
+									"console.log(\"Pagination and Filter Validation\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"console.log('Accessing: responseData.data.meta')\r",
+									"\r",
+									"pm.test(\"confirm the API honored the limit parameter passed in the request (Query Params).\", ()=>{\r",
+									"  pm.expect(responseData.data.meta.page_size).to.eql('100');\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm the count in the metadata matches the number of bank objects actually returned in the array.\", ()=>{\r",
+									"  pm.expect(responseData.data.meta.records).to.equal(responseData.data.data.length);\r",
+									"})\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm the API honored the page parameter.\", ()=>{\r",
+									"  pm.expect(responseData.data.meta.page).to.eql('1');\r",
+									"})\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"console.log(\"Meta Data Validation (Cost and Balance)\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"console.log('Accessing: responseData.data.meta')\r",
+									"\r",
+									"pm.test(\"confirm a nominal cost was applied, even for retrieving a configuration list.\", ()=>{\r",
+									"  pm.expect(responseData.meta.cost).to.be.a('number').and.to.be.above(0);\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm the balance is returned as a number and has been updated\", ()=>{\r",
+									"  pm.expect(responseData.meta.balance).to.be.a('number');\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/direct-debit/banks?limit=100&page=1&sort_dir=ASC",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"direct-debit",
+								"banks"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "100"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "sort_dir",
+									"value": "ASC"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Details of a Bank",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json()\r",
+									"\r",
+									"console.log(\"High-Level Status and Message Validation\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status codes\",()=>{\r",
+									"   const resStatus =  pm.response.code\r",
+									"   pm.expect(resStatus).to.equal(200);\r",
+									"})\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirms the system-level status confirms success.\",()=>{\r",
+									"   pm.expect(responseData.status).to.eql('success');\r",
+									"})\r",
+									"\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm the bank details payload is present and is a JSON object.\", ()=>{\r",
+									"    pm.expect(responseData).to.have.property('data'); \r",
+									"    pm.expect(responseData.data).to.be.an('object');\r",
+									"})\r",
+									"\r",
+									"\r",
+									"console.log(\"Core Bank Details Validation\")\r",
+									"console.log(\"--------------------------------\");\r",
+									"\r",
+									"pm.test(\"confirm code format (usually 3 digits for commercial banks).\", ()=>{\r",
+									"pm.expect(responseData.data.bank_code).to.be.a('string').and.to.have.lengthOf(3);\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm the NIBSS code is a 6-digit string.\", ()=>{\r",
+									"pm.expect(responseData.data.institution_code).to.be.a('string').and.to.have.lengthOf(6)\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm he URL is present, is a string, and points to an image file.\", ()=>{\r",
+									"pm.expect(responseData.data.url).to.be.a('string').and.to.include.oneOf(['png','jpeg', 'jpg']);\r",
+									"})\r",
+									"\r",
+									"\r",
+									"\r",
+									"console.log(\"Direct Debit Metadata Validation (Business Logic)\")\r",
+									"console.log(\"--------------------------------\");\r",
+									"\r",
+									"pm.test(\"confirm the exact amount required to activate a mandate is correct and in the expected string/decimal format.\", ()=>{\r",
+									"pm.expect(responseData.data.activation_amount).to.be.a('string').and.to.eql('50.00')\r",
+									"})\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm meta field is present as a string (it's a stringified JSON object).\", ()=>{\r",
+									"pm.expect(responseData.data.meta).to.be.a('string');\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm to ensure the necessary keys for direct debit are present within the stringified meta data.\", ()=>{\r",
+									"pm.expect(responseData.data.meta).to.include('mandate-activation-amount');\r",
+									"})\r",
+									"\r",
+									"console.log(\". Meta Data Validation (Cost and Balance)\")\r",
+									"console.log(\"--------------------------------\");\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm to the low, expected cost for a configuration lookup.\", ()=>{\r",
+									"pm.expect(responseData.meta.cost).to.be.a('number').and.to.equal(1);\r",
+									"})\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm the balance is returned as a number and has been updated.\", ()=>{\r",
+									"pm.expect(responseData.meta.balance).to.be.a('number');\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/direct-debit/banks/{{bank_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"direct-debit",
+								"banks",
+								"{{bank_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Direct debit is a payment method that allows an account holder to grant authorization for a biller or lender to take money from their bank account for services as of when due\n\nthis is the API"
+		},
+		{
+			"name": "Mandates",
+			"item": [
+				{
+					"name": "Create Mandate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json();\r",
+									"\r",
+									"\r",
+									"console.log(\"High-Level Status and Message Validation\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status codes\",()=>{\r",
+									"   const resStatus =  pm.response.code\r",
+									"   pm.expect(resStatus).to.equal(200);\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm success status.\",()=>{\r",
+									"pm.expect(responseData.status).to.eql('success');\r",
+									"})\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validation for the response message\", ()=>{\r",
+									"    pm.expect(responseData).to.have.property('message', 'Mandate created successfully');\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm a unique ID was generated and is valid.\",()=>{\r",
+									"pm.expect(responseData.data.id).to.be.a('number').and.to.be.above(0);\r",
+									"})\r",
+									"\r",
+									"\r",
+									"console.log(\"Data Integrity (Input vs. Output Validation)\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm that the key terms of the mandate were stored exactly as sent.\",()=>{\r",
+									"    pm.expect(responseData.data.id).to.be.a('number').and.to.be.above(0);\r",
+									"    pm.expect(responseData.data.account_number).to.eql('0123456789');\r",
+									"    pm.expect(responseData.data.debit_type).to.eql('all');\r",
+									"    pm.expect(responseData.data.amount).to.be.a('string').and.to.eql('500.00');\r",
+									"    pm.expect(responseData.data.frequency).to.eql('daily'); \r",
+									"})\r",
+									"\r",
+									"console.log(\"Mandate Status and Type)\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm mandate start in the 'initiated' state\",()=>{\r",
+									"pm.expect(responseData.data.status).to.be.a('string').and.to.eql('initiated');\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm the type was correctly recorded.\",()=>{\r",
+									"pm.expect(responseData.data.type).to.be.a('string').and.to.eql('emandate');\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm the type was correctly recorded.\",()=>{\r",
+									"    pm.expect(responseData.data.type).to.be.a('string').and.to.eql('emandate');\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm the system generated a unique external tracking reference.\",()=>{\r",
+									"    pm.expect(responseData.data.reference_number).to.be.a('string').and.to.not.be.empty;\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"account_number\": \"2017991793\",\r\n    \"phone_number\": \"08072444975\",\r\n    \"debit_type\": \"partial\",\r\n    \"frequency\": \"daily\",\r\n    \"bank_code\": \"50211\",\r\n    \"email\": \"jesutomy.oni@gmail.com\",\r\n    \"number_of_payments\": 5,\r\n    \"payment_start_date\": \"2024-11-01\",\r\n    \"start_date\": \"2024-11-01\",\r\n    \"end_date\": \"2024-12-30\",\r\n    \"narration\": \"Rand\",\r\n    \"address\": \"Ikate\",\r\n    \"invite\": true,\r\n    \"amount\": 1500,\r\n    \"minimum_amount\": 1000,\r\n    \"type\": \"emandate\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/direct-debit/mandates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"direct-debit",
+								"mandates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Mandates",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json()\r",
+									"\r",
+									"console.log(\"High-Level Status and Message Validation\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status codes\",()=>{\r",
+									"   const resStatus =  pm.response.code\r",
+									"   pm.expect(resStatus).to.equal(200);\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm success status.\",()=>{\r",
+									"    pm.expect(responseData.status).to.eql('success');\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Validation for the response message\", ()=>{\r",
+									"    pm.expect(responseData).to.have.property('message', 'success');\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm Mandates must be returned as an array nested under data.data.\",()=>{\r",
+									"    pm.expect(responseData.data).to.have.property('data'); \r",
+									"    pm.expect(responseData.data.data).to.be.an('array');\r",
+									"})\r",
+									"\r",
+									"pm.test(\"confirm the number of returned mandates does not exceed the requested limit (10).\",()=>{\r",
+									"  pm.expect(responseData.data.data.length).to.be.at.most(10);\r",
+									"}) \r",
+									"\r",
+									"\r",
+									"console.log(\"Pagination Metadata Validation\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"confirm the total count in metadata must match the number of records returned in the current array.\",()=>{\r",
+									" pm.expect(responseData.data.meta.records).to.be.a('number').and.to.equal(responseData.data.data.length);\r",
+									"}) \r",
+									"\r",
+									"\r",
+									"\r",
+									"console.log(\"Deep Mandate Object Schema and Status Validation\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"confirm the unique ID and the external reference number are present and valid.\",()=>{\r",
+									"    pm.expect(responseData.data.data[0].id).to.be.a('number').and.to.be.above(0);\r",
+									"    pm.expect(responseData.data.data[0].reference_number).to.be.a('string').and.to.not.be.empty;\r",
+									"}) \r",
+									"\r",
+									"pm.test(\"confirm all monetary fields are strings formatted with two decimal places.\",()=>{\r",
+									"   pm.expect(responseData.data.data[0].amount).to.be.a('string').and.to.match(/^\\d+\\.\\d{2}$/); pm.expect(responseData.data.data[0].minimum_amount).to.be.a('string').and.to.match(/^\\d+\\.\\d{2}$/);\r",
+									"}) \r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm the status is one of the allowed operational states.\",()=>{\r",
+									"  pm.expect(responseData.data.data[0].status).to.be.oneOf(['initiated', 'active', 'inactive', 'failed', 'pending']);\r",
+									"}) \r",
+									"pm.test(\"confirm the business logic fields are restricted to valid options.\",()=>{\r",
+									"    pm.expect(responseData.data.data[0].debit_type).to.be.oneOf(['all', 'partial']); pm.expect(responseData.data.data[0].frequency).to.be.oneOf(['daily', 'weekly', 'monthly']);\r",
+									"}) \r",
+									"\r",
+									"pm.test(\"confirm the start_date adheres to the expected ISO 8601 format.\",()=>{\r",
+									"  pm.expect(responseData.data.data[0].start_date).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/);\r",
+									"}) \r",
+									"\r",
+									"\r",
+									"console.log(\"Nested Object Validation (bank and beneficiary)\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"confirm the nested bank name information is present \",()=>{\r",
+									"  pm.expect(responseData.data.data[0].bank.name).to.be.a('string').and.not.empty;\r",
+									"}) \r",
+									"\r",
+									"pm.test(\"confirm the nested beneficiary account details are present for auditing.\",()=>{\r",
+									"  pm.expect(responseData.data.data[0].beneficiary.account_number).to.be.a('string').and.to.not.be.empty;\r",
+									"}) \r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm the instruction field is present, providing guidance on the current status.\",()=>{\r",
+									"    pm.expect(responseData.data.data[0].activation_instruction).to.be.a('string').and.to.include('mandate');\r",
+									"}) \r",
+									"\r",
+									"\r",
+									"\r",
+									"console.log(\"Meta Data Validation\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"confirm a nominal transaction cost was applied.\",()=>{\r",
+									"    pm.expect(responseData.meta.cost).to.be.a('number').and.to.be.above(0);\r",
+									"}) \r",
+									"\r",
+									"pm.test(\"confirm he balance is returned as a number and has been updated.\",()=>{\r",
+									"    pm.expect(responseData.meta.balance).to.be.a('number');\r",
+									"}) "
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/direct-debit/mandates?limit=10&page=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"direct-debit",
+								"mandates"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "This endpoint allows you to create a mandate on a customer's account. The default mandate type is the emandate, which customers can easily activate by themselves."
+		},
+		{
+			"name": "Transactions",
+			"item": [
+				{
+					"name": "Get All Transactions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json()\r",
+									"const page = pm.request.url.query.get('page') || '1';\r",
+									"const transactions = responseData.data.data;\r",
+									"\r",
+									"console.log(\"High-Level Status and Message Validation\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status codes\",()=>{\r",
+									"   const resStatus =  pm.response.code\r",
+									"   pm.expect(resStatus).to.equal(200);\r",
+									"})\r",
+									"pm.test(\"confirm the system-level status is 'success'\", ()=>{\r",
+									"    pm.expect(responseData.status).to.eql('success');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the response message is 'success'\", ()=>{\r",
+									"    pm.expect(responseData.message).to.eql('success');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm Transactions must be returned as an array nested under data.data.\",()=>{\r",
+									"    pm.expect(responseData.data).to.have.property('data');\r",
+									"    pm.expect(transactions).to.be.an('array');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the number of returned transactions does not exceed the requested limit.\",()=>{\r",
+									"    pm.expect(transactions.length).to.be.at.most(10);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"console.log(\"Pagination Metadata Validation\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"confirm the 'page_size' in metadata matches the requested 'limit'\",()=>{\r",
+									"    pm.expect(responseData.data.meta.page_size).to.eql(10);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the 'page' number in metadata matches the requested 'page'\",()=>{\r",
+									"    pm.expect(responseData.data.meta.page).to.eql(page);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the 'records' count matches the number of transactions returned in the array.\",()=>{\r",
+									"    pm.expect(responseData.data.meta.records).to.be.a('number').and.to.equal(transactions.length);\r",
+									"});\r",
+									"\r",
+									"console.log(\"Deep Transaction Object Schema and Status Validation (Checking the first transaction)\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"\r",
+									"if (Array.isArray(transactions)){\r",
+									"if (transactions.length > 0) {\r",
+									"    const firstTransaction = transactions[0];\r",
+									"\r",
+									"    pm.test(\"confirm the transaction has a unique ID (number > 0)\",()=>{\r",
+									"        pm.expect(firstTransaction.id).to.be.a('number').and.to.be.above(0);\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"confirm 'amount' is a string matching non-decimal format.\",()=>{\r",
+									"        // Matches non-decimal string amounts like \"500\"\r",
+									"        pm.expect(firstTransaction.amount).to.be.a('string').and.to.match(/^\\d+$/);\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"confirm 'status' is one of the allowed operational states (e.g., successful, failed, pending).\",()=>{\r",
+									"        pm.expect(firstTransaction.status).to.be.a('string').and.to.be.oneOf(['successful', 'failed', 'pending']);\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"confirm 'mandate_id' is a positive number.\",()=>{\r",
+									"        pm.expect(firstTransaction.mandate_id).to.be.a('number').and.to.be.above(0);\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"confirm 'reference' is present and is a string.\",()=>{\r",
+									"        pm.expect(firstTransaction.reference).to.be.a('string').and.to.not.be.empty;\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"confirm 'mandate_bvn' is an 11-digit string.\",()=>{\r",
+									"        pm.expect(firstTransaction.mandate_bvn).to.be.a('string').and.to.have.lengthOf(11);\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"confirm 'created_on' is in 'YYYY-MM-DD HH:MM:SS' format.\",()=>{\r",
+									"        pm.expect(firstTransaction.created_on).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+									"    });\r",
+									"    \r",
+									"    console.log(\"Nested Mandate/Bank Details\")\r",
+									"    console.log(\"--------------------------------\")\r",
+									"\r",
+									"    pm.test(\"confirm nested 'mandate' object contains 'reference_number'.\",()=>{\r",
+									"        pm.expect(firstTransaction.mandate.reference_number).to.be.a('string').and.to.not.be.empty;\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"confirm nested 'mandate_bank' object contains 'name' and 'bank_code'.\",()=>{\r",
+									"        pm.expect(firstTransaction.mandate_bank.name).to.be.a('string').and.to.not.be.empty;\r",
+									"        pm.expect(firstTransaction.mandate_bank.bank_code).to.be.a('string');\r",
+									"    });\r",
+									"} else {\r",
+									"    pm.test(\"No transactions returned in the array.\", () => {\r",
+									"        console.warn(\"Array is empty. Skipping deep schema validation.\");\r",
+									"    });\r",
+									"}\r",
+									"}\r",
+									"\r",
+									"\r",
+									"\r",
+									"console.log(\"Root Meta Data Validation (Cost and Balance)\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"confirm the cost for transaction lookup is present and a number (Expected: 1).\",()=>{\r",
+									"    pm.expect(responseData.meta.cost).to.be.a('number').and.to.be.above(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the balance is returned as a number.\",()=>{\r",
+									"    pm.expect(responseData.meta.balance).to.be.a('number');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/direct-debit/transactions?limit=10&page=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"direct-debit",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Details of a Transaction",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json();\r",
+									"const transactions = responseData.data.data;\r",
+									"\r",
+									"\r",
+									"console.log(\"High-Level Status and Data Structure \")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status code (200)\",()=>{\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the system-level status is 'success'\", ()=>{\r",
+									"    pm.expect(responseData.status).to.eql('success');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the response message is 'success'\", ()=>{\r",
+									"    pm.expect(responseData.message).to.eql('success');\r",
+									"});\r",
+									"\r",
+									"// CRITICAL: This test ensures the array exists and contains exactly one record.\r",
+									"pm.test(\"confirm the single transaction is returned inside a 'data' array and has length 1.\",()=>{\r",
+									"    pm.expect(responseData.data).to.have.property('data');\r",
+									"    pm.expect(transactions).to.be.an('array').and.to.have.lengthOf(1);\r",
+									"});\r",
+									"\r",
+									"console.log(\"Pagination/Meta Data Validation (Confirms single record retrieved)\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"confirm 'records' count matches the single transaction returned (1).\",()=>{\r",
+									"    pm.expect(responseData.data.meta.records).to.be.a('number').and.to.equal(1);\r",
+									"});\r",
+									"\r",
+									"console.log(\"Core Transaction Data Validation (Mandatory fields)\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"// From here on, we access transactions[0]. If the previous test failed, the entire test run \r",
+									"// will be stopped or marked as failed, achieving the required \"fail\" state.\r",
+									"\r",
+									"pm.test(\"confirm the returned 'reference' is present and is a string.\",()=>{\r",
+									"    pm.expect(transactions[0].reference).to.be.a('string').and.to.not.be.empty;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm 'id' and 'mandate_id' are positive numbers.\",()=>{\r",
+									"    pm.expect(transactions[0].id).to.be.a('number').and.to.be.above(0);\r",
+									"    pm.expect(transactions[0].mandate_id).to.be.a('number').and.to.be.above(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm 'amount' is a string formatted with two decimal places.\",()=>{\r",
+									"    pm.expect(transactions[0].amount).to.be.a('string').and.to.match(/^\\d+\\.\\d{2}$/);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"confirm 'status' is one of the operational states (successful, failed, pending).\",()=>{\r",
+									"    pm.expect(transactions[0].status).to.be.a('string').and.to.be.oneOf(['successful', 'failed', 'pending']);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm 'mandate_bvn' is present and has length 11.\",()=>{\r",
+									"    pm.expect(transactions[0].mandate_bvn).to.be.a('string').and.to.have.lengthOf(11);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm 'created_on' is in 'YYYY-MM-DD HH:MM:SS' format.\",()=>{\r",
+									"    pm.expect(transactions[0].created_on).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/);\r",
+									"});\r",
+									"\r",
+									"console.log(\"Nested Mandate/Bank Details Validation  \")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"confirm nested 'mandate' object contains 'reference_number'.\",()=>{\r",
+									"    pm.expect(transactions[0].mandate.reference_number).to.be.a('string').and.to.not.be.empty;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm nested 'mandate_bank' object contains 'name' and 'bank_code'.\",()=>{\r",
+									"    pm.expect(transactions[0].mandate_bank.name).to.be.a('string').and.to.not.be.empty;\r",
+									"    pm.expect(transactions[0].mandate_bank.bank_code).to.be.a('string');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the mandate bank is Guaranty Trust Bank (GTB) for this sample.\",()=>{\r",
+									"    pm.expect(transactions[0].mandate_bank.name).to.eql('Guaranty Trust Bank');\r",
+									"    pm.expect(transactions[0].mandate_bank.bank_code).to.eql('058');\r",
+									"});\r",
+									"\r",
+									"console.log(\"Root Meta Data Validation (Cost and Balance)\")\r",
+									"console.log(\"--------------------------------\")\r",
+									"\r",
+									"pm.test(\"confirm the cost for transaction lookup is present and a number (Expected: 1).\",()=>{\r",
+									"    pm.expect(responseData.meta.cost).to.be.a('number').and.to.equal(1);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"confirm the balance is returned as a number.\",()=>{\r",
+									"    pm.expect(responseData.meta.balance).to.be.a('number');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/direct-debit/transactions?reference=DD-cU26qsO05mGCSGn",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"direct-debit",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "reference",
+									"value": "DD-cU26qsO05mGCSGn"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "TRANSACTION API"
+		},
+		{
+			"name": "Decisioning",
+			"item": [
+				{
+					"name": "Get Decision Models",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json()\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status codes\",()=>{\r",
+									"   const resStatus =  pm.response.code\r",
+									"   pm.expect(resStatus).to.equal(200);\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/decisioning/models",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"decisioning",
+								"models"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Decision Model Details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json()\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status codes\",()=>{\r",
+									"   const resStatus =  pm.response.code\r",
+									"   pm.expect(resStatus).to.equal(200);\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/decisioning/models/1/settings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"decisioning",
+								"models",
+								"1",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Oraculi Borrower Scoring",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseData = pm.response.json()\r",
+									"\r",
+									"pm.test(\"Validation for the HTTP status codes\",()=>{\r",
+									"   const resStatus =  pm.response.code\r",
+									"   pm.expect(resStatus).to.equal(200);\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Validation for the response message\", ()=>{\r",
+									"    pm.expect(responseData).to.have.property('message', 'Successful');\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"gender\": \"Female\",\r\n    \"marital_status\": \"Single\",\r\n    \"age\": \"21 - 30\",\r\n    \"location\": \"lagos\",\r\n    \"no_of_dependent\": \"0\",\r\n    \"type_of_residence\": \"Rented Apartment\",\r\n    \"educational_attainment\": \"BSc, HND and Other Equivalent\",\r\n    \"employment_status\": \"Employed\",\r\n    \"sector_of_employment\": \"Other Financial\",\r\n    \"tier\": \"Tier 1\",\r\n    \"monthly_net_income\": \"100,000 - 199,999\",\r\n    \"employer_category\": \"Private Company\",\r\n    \"bvn\": \"22233312345\",\r\n    \"phone_number\": \"08012345678\",\r\n    \"total_years_of_experience\": 5,\r\n    \"time_with_current_employer\": 2,\r\n    \"previous_lendsqr_loans\": 3,\r\n    \"code\": \"9dppknauu\",\r\n    \"phone\": \"08012345678\",\r\n    \"bvn_phone\": \"08012345678\",\r\n    \"office_email\": \"adojohnsule@lendsqr.com\",\r\n    \"personal_email\": \"adojohnsule@lendsqr.com\",\r\n    \"amount\": 10000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/decisioning/models/2355",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"decisioning",
+								"models",
+								"2355"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base",
+			"value": ""
+		}
+	]
+}
